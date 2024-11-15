@@ -1,0 +1,24 @@
+{
+  "Format": "2.4.0",
+  "Changes": [
+    {
+      "Action": "Load",
+      "Target": "{{ModId}}/fishpond-4x4",
+      "FromFile": "assets/{{TargetWithoutPath}}.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Buildings",
+      "TargetField": [
+        "Fish Pond"
+      ],
+      "Entries": {
+        "Texture": "{{ModId}}/fishpond-4x4",
+        "Size": {
+          "X": 4,
+          "Y": 4
+        }
+      }
+    }
+  ]
+}
