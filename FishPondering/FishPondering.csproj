@@ -11,9 +11,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Name>FishPondering</Name>
+    <Name>Fish Pondering</Name>
     <Authors>mushymato</Authors>
-    <Description>DESCRIPTION</Description>
+    <Description>Make fish ponds smaller, configurable.</Description>
     <UniqueId>mushymato.FishPondering</UniqueId>
     <UpdateKeys>Nexus:???</UpdateKeys>
     <Version>0.1.0</Version>

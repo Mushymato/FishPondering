@@ -1,3 +1,5 @@
 {
   "$schema": "https://smapi.io/schemas/i18n.json",
+  "config.PondSize.name": "Pond Size",
+  "config.PondSize.description": "Size of pond in terms of tiles. The recommended value is 4, while 3 and 2 are technically supported."
 }

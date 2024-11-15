@@ -1,5 +1,7 @@
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley.GameData.Buildings;
 
 namespace FishPondering;
 
@@ -18,9 +20,28 @@ public class ModEntry : Mod
         I18n.Init(helper.Translation);
         mon = Monitor;
         Config = Helper.ReadConfig<ModConfig>();
+
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+        helper.Events.Content.AssetRequested += OnAssetRequested;
 
         GamePatches.Patch(ModManifest.UniqueID);
+    }
+
+    private void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
+    {
+        if (e.Name.IsEquivalentTo("Data/Buildings"))
+        {
+            e.Edit(
+                (asset) =>
+                {
+                    IDictionary<string, BuildingData> data = asset
+                        .AsDictionary<string, BuildingData>()
+                        .Data;
+                    data["Fish Pond"].Size = new(Config.PondSize, Config.PondSize);
+                },
+                AssetEditPriority.Late
+            );
+        }
     }
 
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
