@@ -90,13 +90,6 @@ internal static class GamePatches
         return (int)(value * GetPondScale(data));
     }
 
-    private static Vector2 GetBucketOffset(BuildingData data)
-    {
-        float scaleX = data.Size.X / 5f;
-        float scaleY = data.Size.Y / 5f;
-        return new Vector2(65f * scaleX, 59f * scaleY);
-    }
-
     private static int GetSizeX(BuildingData data)
     {
         return data.Size.X;
@@ -452,22 +445,31 @@ internal static class GamePatches
 
             // Bucket: gold empty
             matcher
-                .MatchEndForward(
+                .MatchStartForward(
                     [new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)]
                 )
                 .Advance(1)
-                .Insert(
+                .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
                         new(
                             OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetBucketOffset))
+                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
                         ),
+                        new(OpCodes.Mul),
                     ]
                 )
-                .CreateLabel(out Label lblTmp)
-                .Advance(-3)
-                .Insert([new(OpCodes.Br, lblTmp)]);
+                .Advance(1)
+                .InsertAndAdvance(
+                    [
+                        new(locBuildingData.opcode, locBuildingData.operand),
+                        new(
+                            OpCodes.Call,
+                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
+                        ),
+                        new(OpCodes.Mul),
+                    ]
+                );
 
             matcher
                 .MatchEndForward(
@@ -493,22 +495,31 @@ internal static class GamePatches
 
             // Bucket: normal output ready
             matcher
-                .MatchEndForward(
+                .MatchStartForward(
                     [new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)]
                 )
                 .Advance(1)
-                .Insert(
+                .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
                         new(
                             OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetBucketOffset))
+                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
                         ),
+                        new(OpCodes.Mul),
                     ]
                 )
-                .CreateLabel(out lblTmp)
-                .Advance(-3)
-                .Insert([new(OpCodes.Br, lblTmp)]);
+                .Advance(1)
+                .InsertAndAdvance(
+                    [
+                        new(locBuildingData.opcode, locBuildingData.operand),
+                        new(
+                            OpCodes.Call,
+                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
+                        ),
+                        new(OpCodes.Mul),
+                    ]
+                );
 
             matcher
                 .MatchEndForward(
@@ -534,22 +545,31 @@ internal static class GamePatches
 
             // Bucket: gold output ready
             matcher
-                .MatchEndForward(
+                .MatchStartForward(
                     [new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)]
                 )
                 .Advance(1)
-                .Insert(
+                .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
                         new(
                             OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetBucketOffset))
+                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
                         ),
+                        new(OpCodes.Mul),
                     ]
                 )
-                .CreateLabel(out lblTmp)
-                .Advance(-3)
-                .Insert([new(OpCodes.Br, lblTmp)]);
+                .Advance(1)
+                .InsertAndAdvance(
+                    [
+                        new(locBuildingData.opcode, locBuildingData.operand),
+                        new(
+                            OpCodes.Call,
+                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
+                        ),
+                        new(OpCodes.Mul),
+                    ]
+                );
 
             matcher
                 .MatchEndForward(
