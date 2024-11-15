@@ -8,4 +8,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Working on this spiritually.
+- Made the draw code work by scaling down.
+- the fish lives in terror of resolution more detailed than their eyes have seen all their life -- selph, 2024
