@@ -3,7 +3,7 @@
   "Changes": [
     {
       "Action": "Load",
-      "Target": "{{ModId}}/fishpond-4x4",
+      "Target": "{{ModId}}/fishpond-4x4,{{ModId}}/fishpond-3x3",
       "FromFile": "assets/{{TargetWithoutPath}}.png"
     },
     {
@@ -13,10 +13,10 @@
         "Fish Pond"
       ],
       "Entries": {
-        "Texture": "{{ModId}}/fishpond-4x4",
+        "Texture": "{{ModId}}/fishpond-3x3",
         "Size": {
-          "X": 4,
-          "Y": 4
+          "X": 3,
+          "Y": 3
         }
       }
     }
