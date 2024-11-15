@@ -1,5 +1,5 @@
 {
     "$schema": "https://smapi.io/schemas/i18n.json",
     "config.PondSize.name": "鱼塘尺寸",
-    "config.PondSize.description": "按宽度计算的鱼塘大小，推荐宽度4。"
+    "config.PondSize.description": "按宽度计算的鱼塘大小，推荐宽度4。除了3和4以外，你可以直接修改config.json里的PondSize。在此声明1和2的鱼塘略微抽象，后果自负。"
 }

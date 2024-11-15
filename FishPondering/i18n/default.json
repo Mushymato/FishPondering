@@ -1,5 +1,5 @@
 {
   "$schema": "https://smapi.io/schemas/i18n.json",
   "config.PondSize.name": "Pond Size",
-  "config.PondSize.description": "Size of pond in terms of tile width. The recommended value is 4."
+  "config.PondSize.description": "Size of pond in terms of tile width. The recommended value is 4. Aside from 3 and 4, you can change \"PondSize\" in config.json directly. Just note that it looks really strange and I am not responsible for any issues that occur."
 }
