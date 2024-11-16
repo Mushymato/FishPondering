@@ -2,17 +2,19 @@
 
 Make fish ponds draw correctly at smaller sizes, by altering the scale.
 
-## **Features** 
+## Features
 
 - Compatibile with all fish pond replacer mods.
 - All fish ponds become 4x4 upon installing this mod, and reverts to 5x5 on uninstallation.
+- No gameplay changes were made, hopefully no conflict with mods that do alter fish pond gameplay mechanics.
+- Fish pond sign size unchanged.
 
 ## Why this mod instead of [The Return of Smaller Fish Ponds](https://www.nexusmods.com/stardewvalley/mods/21900)?
 
 - Works in 1.6.14+.
 - Written with 1.6 building features in mind, should have less multiplayer/splitscreen bugs.
 
-## **Config**
+## Config
 
 ### **Pond Size**
 
