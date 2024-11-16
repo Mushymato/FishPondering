@@ -1,0 +1,5 @@
+{
+  "$schema": "https://smapi.io/schemas/i18n.json",
+  "config.PondSize.name": "Tamaño del estanque",
+  "config.PondSize.description": "Tamaño del estanque en términos de anchura de las baldosas. El valor recomendado es 4. Además de 3 y 4, puede cambiar \"PondSize\" en config.json directamente. Ten en cuenta que tiene un aspecto muy extraño y que no me hago responsable de los problemas que puedan surgir."
+}

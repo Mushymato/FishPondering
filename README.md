@@ -26,6 +26,7 @@ Aside from 3 and 4, you can change "PondSize" in config.json directly. Just note
 
 - English
 - Simplified Chinese
+- Spanish (by [Hayato2236](https://next.nexusmods.com/profile/Hayato2236))
 
 More translations are welcome, preferrably added to the main mod but separate page is fine.
 
