@@ -597,7 +597,7 @@ internal static class GamePatches
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Error in Toolbar_draw_Transpiler:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Error in FishPond_draw_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
     }
@@ -845,7 +845,7 @@ internal static class GamePatches
         }
         catch (Exception err)
         {
-            ModEntry.Log($"Error in Toolbar_draw_Transpiler:\n{err}", LogLevel.Error);
+            ModEntry.Log($"Error in FishPond_drawInMenu_Transpiler:\n{err}", LogLevel.Error);
             return instructions;
         }
     }
