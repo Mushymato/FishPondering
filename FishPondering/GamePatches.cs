@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
@@ -13,6 +14,45 @@ namespace FishPondering;
 /// </summary>
 internal static class GamePatches
 {
+    private static readonly MethodInfo Method_GetPondScale = AccessTools.Method(
+        typeof(GamePatches),
+        nameof(GetPondScale)
+    );
+    private static readonly MethodInfo Method_MultByPondScale = AccessTools.Method(
+        typeof(GamePatches),
+        nameof(MultByPondScale)
+    );
+    private static readonly MethodInfo Method_GetSizeX = AccessTools.Method(
+        typeof(GamePatches),
+        nameof(GetSizeX)
+    );
+    private static readonly MethodInfo Method_GetSizeY = AccessTools.Method(
+        typeof(GamePatches),
+        nameof(GetSizeY)
+    );
+
+    private static float GetPondScale(BuildingData data)
+    {
+        if (data != null)
+            return data.Size.X / 5f;
+        return 1f;
+    }
+
+    private static int MultByPondScale(int value, BuildingData data)
+    {
+        return (int)(value * GetPondScale(data));
+    }
+
+    private static int GetSizeX(BuildingData data)
+    {
+        return data.Size.X;
+    }
+
+    private static int GetSizeY(BuildingData data)
+    {
+        return data.Size.Y;
+    }
+
     internal static void Patch(string modId)
     {
         try
@@ -78,28 +118,6 @@ internal static class GamePatches
         }
     }
 
-    private static float GetPondScale(BuildingData data)
-    {
-        if (data != null)
-            return data.Size.X / 5f;
-        return 1f;
-    }
-
-    private static int MultByPondScale(int value, BuildingData data)
-    {
-        return (int)(value * GetPondScale(data));
-    }
-
-    private static int GetSizeX(BuildingData data)
-    {
-        return data.Size.X;
-    }
-
-    private static int GetSizeY(BuildingData data)
-    {
-        return data.Size.Y;
-    }
-
     private static IEnumerable<CodeInstruction> FishPond_draw_Transpiler(
         IEnumerable<CodeInstruction> instructions,
         ILGenerator generator
@@ -140,10 +158,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -168,14 +183,7 @@ internal static class GamePatches
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
                 .Insert(
-                    [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetSizeY))
-                        ),
-                        new(OpCodes.Ldc_I4_1),
-                        new(OpCodes.Sub),
-                    ]
+                    [new(OpCodes.Call, Method_GetSizeY), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
                 );
 
             // Water Overlay: loop2 head
@@ -194,14 +202,7 @@ internal static class GamePatches
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
                 .InsertAndAdvance(
-                    [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetSizeX))
-                        ),
-                        new(OpCodes.Ldc_I4_1),
-                        new(OpCodes.Sub),
-                    ]
+                    [new(OpCodes.Call, Method_GetSizeX), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
                 );
 
             // Water Overlay: loop1 head
@@ -219,9 +220,7 @@ internal static class GamePatches
                     ]
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
-                .Insert(
-                    [new(OpCodes.Call, AccessTools.Method(typeof(GamePatches), nameof(GetSizeY)))]
-                );
+                .Insert([new(OpCodes.Call, Method_GetSizeY)]);
 
             // Pond Waves: position
             matcher
@@ -236,10 +235,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                        ),
+                        new(OpCodes.Call, Method_MultByPondScale),
                     ]
                 );
             matcher
@@ -254,10 +250,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                        ),
+                        new(OpCodes.Call, Method_MultByPondScale),
                     ]
                 );
 
@@ -276,10 +269,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -298,10 +288,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -320,10 +307,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                        ),
+                        new(OpCodes.Call, Method_MultByPondScale),
                     ]
                 );
 
@@ -341,10 +325,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -372,10 +353,7 @@ internal static class GamePatches
                     .InsertAndAdvance(
                         [
                             new(locBuildingData.opcode, locBuildingData.operand),
-                            new(
-                                OpCodes.Call,
-                                AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                            ),
+                            new(OpCodes.Call, Method_GetPondScale),
                             new(OpCodes.Mul),
                         ]
                     )
@@ -383,10 +361,7 @@ internal static class GamePatches
                     .InsertAndAdvance(
                         [
                             new(locBuildingData.opcode, locBuildingData.operand),
-                            new(
-                                OpCodes.Call,
-                                AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                            ),
+                            new(OpCodes.Call, Method_GetPondScale),
                             new(OpCodes.Mul),
                         ]
                     );
@@ -401,10 +376,7 @@ internal static class GamePatches
                     .Insert(
                         [
                             new(locBuildingData.opcode, locBuildingData.operand),
-                            new(
-                                OpCodes.Call,
-                                AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                            ),
+                            new(OpCodes.Call, Method_MultByPondScale),
                         ]
                     );
                 matcher
@@ -413,10 +385,7 @@ internal static class GamePatches
                     .Insert(
                         [
                             new(locBuildingData.opcode, locBuildingData.operand),
-                            new(
-                                OpCodes.Call,
-                                AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                            ),
+                            new(OpCodes.Call, Method_MultByPondScale),
                         ]
                     );
                 // should technically adjust urchin shadow but whatever
@@ -434,10 +403,7 @@ internal static class GamePatches
                     .Insert(
                         [
                             new(locBuildingData.opcode, locBuildingData.operand),
-                            new(
-                                OpCodes.Call,
-                                AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                            ),
+                            new(OpCodes.Call, Method_GetPondScale),
                             new(OpCodes.Mul),
                         ]
                     );
@@ -452,10 +418,7 @@ internal static class GamePatches
                 .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 )
@@ -463,10 +426,7 @@ internal static class GamePatches
                 .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -485,10 +445,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -502,10 +459,7 @@ internal static class GamePatches
                 .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 )
@@ -513,10 +467,7 @@ internal static class GamePatches
                 .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -535,10 +486,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -552,10 +500,7 @@ internal static class GamePatches
                 .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 )
@@ -563,10 +508,7 @@ internal static class GamePatches
                 .InsertAndAdvance(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -585,10 +527,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -642,10 +581,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -670,14 +606,7 @@ internal static class GamePatches
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
                 .Insert(
-                    [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetSizeY))
-                        ),
-                        new(OpCodes.Ldc_I4_1),
-                        new(OpCodes.Sub),
-                    ]
+                    [new(OpCodes.Call, Method_GetSizeY), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
                 );
 
             // Water Overlay: loop2 head
@@ -696,14 +625,7 @@ internal static class GamePatches
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
                 .InsertAndAdvance(
-                    [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetSizeX))
-                        ),
-                        new(OpCodes.Ldc_I4_1),
-                        new(OpCodes.Sub),
-                    ]
+                    [new(OpCodes.Call, Method_GetSizeX), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
                 );
 
             // Water Overlay: loop1 head
@@ -721,9 +643,7 @@ internal static class GamePatches
                     ]
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
-                .Insert(
-                    [new(OpCodes.Call, AccessTools.Method(typeof(GamePatches), nameof(GetSizeY)))]
-                );
+                .Insert([new(OpCodes.Call, Method_GetSizeY)]);
 
             // Pond: scale
             matcher
@@ -739,10 +659,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -755,10 +672,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                        ),
+                        new(OpCodes.Call, Method_MultByPondScale),
                     ]
                 );
             matcher
@@ -768,10 +682,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                        ),
+                        new(OpCodes.Call, Method_MultByPondScale),
                     ]
                 );
 
@@ -790,10 +701,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
@@ -812,10 +720,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(MultByPondScale))
-                        ),
+                        new(OpCodes.Call, Method_MultByPondScale),
                     ]
                 );
 
@@ -833,10 +738,7 @@ internal static class GamePatches
                 .Insert(
                     [
                         new(locBuildingData.opcode, locBuildingData.operand),
-                        new(
-                            OpCodes.Call,
-                            AccessTools.Method(typeof(GamePatches), nameof(GetPondScale))
-                        ),
+                        new(OpCodes.Call, Method_GetPondScale),
                         new(OpCodes.Mul),
                     ]
                 );
