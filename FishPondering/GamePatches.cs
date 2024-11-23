@@ -108,7 +108,7 @@ internal static class GamePatches
                         new(OpCodes.Ldfld, AccessTools.Field(typeof(PondFishSilhouette), "_pond")),
                         new(OpCodes.Callvirt, AccessTools.Method(typeof(FishPond), nameof(FishPond.GetData))),
                         new(OpCodes.Call, Method_GetPondScale),
-                        new(OpCodes.Mul)
+                        new(OpCodes.Mul),
                     ]
                 );
 
