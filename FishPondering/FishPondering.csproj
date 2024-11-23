@@ -16,7 +16,7 @@
     <Description>Make fish ponds smaller, configurable.</Description>
     <UniqueId>mushymato.FishPondering</UniqueId>
     <UpdateKeys>Nexus:29422</UpdateKeys>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <MinimumApiVersion_Behavior>UpdateFull</MinimumApiVersion_Behavior>
     <MinimumGameVersion_Behavior>UpdateFull</MinimumGameVersion_Behavior>
     <Dependencies_VersionBehavior>UpdateFull</Dependencies_VersionBehavior>
