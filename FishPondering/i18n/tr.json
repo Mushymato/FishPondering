@@ -1,0 +1,5 @@
+{
+  "$schema": "https://smapi.io/schemas/i18n.json",
+  "config.PondSize.name": "Gölet Boyutu",
+  "config.PondSize.description": "Kiremit genişliğine göre göletin boyutu. Önerilen değer 4 dür 3 ve 4 dışında değiştirebilirsiniz \"PondSize\" Doğrudan confing.json içinde bulunuyor. Sadece bunun gerçek anlamda tuhaf göründüğünü ve meydana gelen sorunlardan sorumlu olduğumu unutmayın."
+}

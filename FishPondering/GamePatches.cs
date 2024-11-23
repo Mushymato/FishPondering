@@ -22,14 +22,8 @@ internal static class GamePatches
         typeof(GamePatches),
         nameof(MultByPondScale)
     );
-    private static readonly MethodInfo Method_GetSizeX = AccessTools.Method(
-        typeof(GamePatches),
-        nameof(GetSizeX)
-    );
-    private static readonly MethodInfo Method_GetSizeY = AccessTools.Method(
-        typeof(GamePatches),
-        nameof(GetSizeY)
-    );
+    private static readonly MethodInfo Method_GetSizeX = AccessTools.Method(typeof(GamePatches), nameof(GetSizeX));
+    private static readonly MethodInfo Method_GetSizeY = AccessTools.Method(typeof(GamePatches), nameof(GetSizeY));
 
     private static float GetPondScale(BuildingData data)
     {
@@ -65,56 +59,65 @@ internal static class GamePatches
             );
             harmony.Patch(
                 original: AccessTools.DeclaredMethod(typeof(FishPond), nameof(FishPond.drawInMenu)),
-                transpiler: new HarmonyMethod(
-                    typeof(GamePatches),
-                    nameof(FishPond_drawInMenu_Transpiler)
-                )
+                transpiler: new HarmonyMethod(typeof(GamePatches), nameof(FishPond_drawInMenu_Transpiler))
             );
             // rect/pos patches
             harmony.Patch(
-                original: AccessTools.DeclaredMethod(
-                    typeof(FishPond),
-                    nameof(FishPond.getSourceRectForMenu)
-                ),
-                postfix: new HarmonyMethod(
-                    typeof(GamePatches),
-                    nameof(FishPond_getSourceRectForMenu_Postfix)
-                )
+                original: AccessTools.DeclaredMethod(typeof(FishPond), nameof(FishPond.getSourceRectForMenu)),
+                postfix: new HarmonyMethod(typeof(GamePatches), nameof(FishPond_getSourceRectForMenu_Postfix))
             );
             harmony.Patch(
-                original: AccessTools.DeclaredMethod(
-                    typeof(FishPond),
-                    nameof(FishPond.GetItemBucketTile)
-                ),
-                postfix: new HarmonyMethod(
-                    typeof(GamePatches),
-                    nameof(FishPond_GetItemBucketTile_Postfix)
-                )
+                original: AccessTools.DeclaredMethod(typeof(FishPond), nameof(FishPond.GetItemBucketTile)),
+                postfix: new HarmonyMethod(typeof(GamePatches), nameof(FishPond_GetItemBucketTile_Postfix))
             );
             harmony.Patch(
-                original: AccessTools.DeclaredMethod(
-                    typeof(FishPond),
-                    nameof(FishPond.GetRequestTile)
-                ),
-                postfix: new HarmonyMethod(
-                    typeof(GamePatches),
-                    nameof(FishPond_GetCenterTile_Postfix)
-                )
+                original: AccessTools.DeclaredMethod(typeof(FishPond), nameof(FishPond.GetRequestTile)),
+                postfix: new HarmonyMethod(typeof(GamePatches), nameof(FishPond_GetCenterTile_Postfix))
             );
             harmony.Patch(
-                original: AccessTools.DeclaredMethod(
-                    typeof(FishPond),
-                    nameof(FishPond.GetCenterTile)
-                ),
-                postfix: new HarmonyMethod(
-                    typeof(GamePatches),
-                    nameof(FishPond_GetCenterTile_Postfix)
-                )
+                original: AccessTools.DeclaredMethod(typeof(FishPond), nameof(FishPond.GetCenterTile)),
+                postfix: new HarmonyMethod(typeof(GamePatches), nameof(FishPond_GetCenterTile_Postfix))
+            );
+            // fish silhouette
+            harmony.Patch(
+                original: AccessTools.DeclaredMethod(typeof(PondFishSilhouette), nameof(PondFishSilhouette.Update)),
+                transpiler: new HarmonyMethod(typeof(GamePatches), nameof(PondFishSilhouette_Update_Transpiler))
             );
         }
         catch (Exception err)
         {
             ModEntry.Log($"Failed to patch FishPondering:\n{err}", LogLevel.Error);
+        }
+    }
+
+    private static IEnumerable<CodeInstruction> PondFishSilhouette_Update_Transpiler(
+        IEnumerable<CodeInstruction> instructions,
+        ILGenerator generator
+    )
+    {
+        try
+        {
+            CodeMatcher matcher = new(instructions, generator);
+
+            matcher
+                .MatchEndForward([new(OpCodes.Ldc_R4, 1.3f), new((inst) => inst.IsStloc())])
+                .Insert(
+                    [
+                        // 1.3 * GetPondScale(this._pond.GetData())
+                        new(OpCodes.Ldarg_0),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(PondFishSilhouette), "_pond")),
+                        new(OpCodes.Callvirt, AccessTools.Method(typeof(FishPond), nameof(FishPond.GetData))),
+                        new(OpCodes.Call, Method_GetPondScale),
+                        new(OpCodes.Mul)
+                    ]
+                );
+
+            return matcher.Instructions();
+        }
+        catch (Exception err)
+        {
+            ModEntry.Log($"Error in FishPond_drawInMenu_Transpiler:\n{err}", LogLevel.Error);
+            return instructions;
         }
     }
 
@@ -135,10 +138,7 @@ internal static class GamePatches
                         new((inst) => inst.IsLdloc()),
                         new(
                             OpCodes.Call,
-                            AccessTools.DeclaredMethod(
-                                typeof(Building),
-                                nameof(Building.ShouldDrawShadow)
-                            )
+                            AccessTools.DeclaredMethod(typeof(Building), nameof(Building.ShouldDrawShadow))
                         ),
                     ]
                 );
@@ -147,12 +147,7 @@ internal static class GamePatches
             // Pond Bottom: scale
             matcher
                 .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 80f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                    ]
+                    [new(OpCodes.Ldc_R4, 0f), new(OpCodes.Ldc_R4, 80f), new(OpCodes.Newobj), new(OpCodes.Ldc_R4, 4f)]
                 )
                 .Advance(1)
                 .Insert(
@@ -173,18 +168,13 @@ internal static class GamePatches
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Building), nameof(Building.tileY))
-                        ),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(Building), nameof(Building.tileY))),
                         new(OpCodes.Callvirt),
                         new(OpCodes.Ldc_I4_4),
                     ]
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
-                .Insert(
-                    [new(OpCodes.Call, Method_GetSizeY), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
-                );
+                .Insert([new(OpCodes.Call, Method_GetSizeY), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]);
 
             // Water Overlay: loop2 head
             matcher
@@ -192,18 +182,13 @@ internal static class GamePatches
                     [
                         new((inst) => inst.labels.Contains(loop2)),
                         new(OpCodes.Ldarg_0),
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Building), nameof(Building.tileX))
-                        ),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(Building), nameof(Building.tileX))),
                         new(OpCodes.Callvirt),
                         new(OpCodes.Ldc_I4_4),
                     ]
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
-                .InsertAndAdvance(
-                    [new(OpCodes.Call, Method_GetSizeX), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
-                );
+                .InsertAndAdvance([new(OpCodes.Call, Method_GetSizeX), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]);
 
             // Water Overlay: loop1 head
             matcher
@@ -211,10 +196,7 @@ internal static class GamePatches
                     [
                         new((inst) => inst.labels.Contains(loop1)),
                         new(OpCodes.Ldarg_0),
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Building), nameof(Building.tileY))
-                        ),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(Building), nameof(Building.tileY))),
                         new(OpCodes.Callvirt),
                         new(OpCodes.Ldc_I4_5),
                     ]
@@ -233,10 +215,7 @@ internal static class GamePatches
                     ]
                 )
                 .Insert(
-                    [
-                        new(locBuildingData.opcode, locBuildingData.operand),
-                        new(OpCodes.Call, Method_MultByPondScale),
-                    ]
+                    [new(locBuildingData.opcode, locBuildingData.operand), new(OpCodes.Call, Method_MultByPondScale)]
                 );
             matcher
                 .MatchEndForward(
@@ -248,20 +227,14 @@ internal static class GamePatches
                     ]
                 )
                 .Insert(
-                    [
-                        new(locBuildingData.opcode, locBuildingData.operand),
-                        new(OpCodes.Call, Method_MultByPondScale),
-                    ]
+                    [new(locBuildingData.opcode, locBuildingData.operand), new(OpCodes.Call, Method_MultByPondScale)]
                 );
 
             // Pond Waves: scale
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))
-                        ),
+                        new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))),
                         new(OpCodes.Ldc_R4, 4f),
                     ]
                 )
@@ -277,12 +250,7 @@ internal static class GamePatches
             // Pond: scale
             matcher
                 .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 80f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                    ]
+                    [new(OpCodes.Ldc_R4, 0f), new(OpCodes.Ldc_R4, 80f), new(OpCodes.Newobj), new(OpCodes.Ldc_R4, 4f)]
                 )
                 .Advance(1)
                 .Insert(
@@ -296,30 +264,17 @@ internal static class GamePatches
             // Netting: position
             matcher
                 .MatchStartForward(
-                    [
-                        new(OpCodes.Ldc_I4, 128),
-                        new(OpCodes.Sub),
-                        new(OpCodes.Conv_R4),
-                        new(OpCodes.Newobj),
-                    ]
+                    [new(OpCodes.Ldc_I4, 128), new(OpCodes.Sub), new(OpCodes.Conv_R4), new(OpCodes.Newobj)]
                 )
                 .Advance(1)
                 .Insert(
-                    [
-                        new(locBuildingData.opcode, locBuildingData.operand),
-                        new(OpCodes.Call, Method_MultByPondScale),
-                    ]
+                    [new(locBuildingData.opcode, locBuildingData.operand), new(OpCodes.Call, Method_MultByPondScale)]
                 );
 
             // Netting: scale
             matcher
                 .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 80f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                    ]
+                    [new(OpCodes.Ldc_R4, 0f), new(OpCodes.Ldc_R4, 80f), new(OpCodes.Newobj), new(OpCodes.Ldc_R4, 4f)]
                 )
                 .Advance(1)
                 .Insert(
@@ -340,13 +295,7 @@ internal static class GamePatches
                         [
                             new(OpCodes.Ldc_R4),
                             new(OpCodes.Ldc_R4),
-                            new(
-                                OpCodes.Call,
-                                AccessTools.Constructor(
-                                    typeof(Vector2),
-                                    [typeof(float), typeof(float)]
-                                )
-                            ),
+                            new(OpCodes.Call, AccessTools.Constructor(typeof(Vector2), [typeof(float), typeof(float)])),
                         ]
                     )
                     .Advance(1)
@@ -392,10 +341,7 @@ internal static class GamePatches
                 matcher
                     .MatchEndForward(
                         [
-                            new(
-                                OpCodes.Call,
-                                AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))
-                            ),
+                            new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))),
                             new(OpCodes.Ldc_R4, 3f),
                         ]
                     )
@@ -411,9 +357,7 @@ internal static class GamePatches
 
             // Bucket: gold empty
             matcher
-                .MatchStartForward(
-                    [new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)]
-                )
+                .MatchStartForward([new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)])
                 .Advance(1)
                 .InsertAndAdvance(
                     [
@@ -434,10 +378,7 @@ internal static class GamePatches
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))
-                        ),
+                        new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))),
                         new(OpCodes.Ldc_R4, 4f),
                     ]
                 )
@@ -452,9 +393,7 @@ internal static class GamePatches
 
             // Bucket: normal output ready
             matcher
-                .MatchStartForward(
-                    [new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)]
-                )
+                .MatchStartForward([new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)])
                 .Advance(1)
                 .InsertAndAdvance(
                     [
@@ -475,10 +414,7 @@ internal static class GamePatches
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))
-                        ),
+                        new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))),
                         new(OpCodes.Ldc_R4, 4f),
                     ]
                 )
@@ -493,9 +429,7 @@ internal static class GamePatches
 
             // Bucket: gold output ready
             matcher
-                .MatchStartForward(
-                    [new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)]
-                )
+                .MatchStartForward([new(OpCodes.Ldc_R4, 65f), new(OpCodes.Ldc_R4, 59f), new(OpCodes.Newobj)])
                 .Advance(1)
                 .InsertAndAdvance(
                     [
@@ -516,10 +450,7 @@ internal static class GamePatches
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))
-                        ),
+                        new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))),
                         new(OpCodes.Ldc_R4, 4f),
                     ]
                 )
@@ -558,10 +489,7 @@ internal static class GamePatches
                         new((inst) => inst.IsLdloc()),
                         new(
                             OpCodes.Call,
-                            AccessTools.DeclaredMethod(
-                                typeof(Building),
-                                nameof(Building.ShouldDrawShadow)
-                            )
+                            AccessTools.DeclaredMethod(typeof(Building), nameof(Building.ShouldDrawShadow))
                         ),
                     ]
                 );
@@ -570,12 +498,7 @@ internal static class GamePatches
             // Pond Bottom: scale
             matcher
                 .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                    ]
+                    [new(OpCodes.Ldc_R4, 0f), new(OpCodes.Ldc_R4, 0f), new(OpCodes.Newobj), new(OpCodes.Ldc_R4, 4f)]
                 )
                 .Advance(1)
                 .Insert(
@@ -596,18 +519,13 @@ internal static class GamePatches
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Building), nameof(Building.tileY))
-                        ),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(Building), nameof(Building.tileY))),
                         new(OpCodes.Callvirt),
                         new(OpCodes.Ldc_I4_4),
                     ]
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
-                .Insert(
-                    [new(OpCodes.Call, Method_GetSizeY), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
-                );
+                .Insert([new(OpCodes.Call, Method_GetSizeY), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]);
 
             // Water Overlay: loop2 head
             matcher
@@ -615,18 +533,13 @@ internal static class GamePatches
                     [
                         new((inst) => inst.labels.Contains(loop2)),
                         new(OpCodes.Ldarg_0),
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Building), nameof(Building.tileX))
-                        ),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(Building), nameof(Building.tileX))),
                         new(OpCodes.Callvirt),
                         new(OpCodes.Ldc_I4_4),
                     ]
                 )
                 .SetAndAdvance(locBuildingData.opcode, locBuildingData.operand)
-                .InsertAndAdvance(
-                    [new(OpCodes.Call, Method_GetSizeX), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]
-                );
+                .InsertAndAdvance([new(OpCodes.Call, Method_GetSizeX), new(OpCodes.Ldc_I4_1), new(OpCodes.Sub)]);
 
             // Water Overlay: loop1 head
             matcher
@@ -634,10 +547,7 @@ internal static class GamePatches
                     [
                         new((inst) => inst.labels.Contains(loop1)),
                         new(OpCodes.Ldarg_0),
-                        new(
-                            OpCodes.Ldfld,
-                            AccessTools.Field(typeof(Building), nameof(Building.tileY))
-                        ),
+                        new(OpCodes.Ldfld, AccessTools.Field(typeof(Building), nameof(Building.tileY))),
                         new(OpCodes.Callvirt),
                         new(OpCodes.Ldc_I4_5),
                     ]
@@ -648,12 +558,7 @@ internal static class GamePatches
             // Pond: scale
             matcher
                 .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                    ]
+                    [new(OpCodes.Ldc_R4, 0f), new(OpCodes.Ldc_R4, 0f), new(OpCodes.Newobj), new(OpCodes.Ldc_R4, 4f)]
                 )
                 .Advance(1)
                 .Insert(
@@ -666,34 +571,21 @@ internal static class GamePatches
 
             // Pond Waves: position
             matcher
-                .MatchEndForward(
-                    [new(OpCodes.Ldarg_2), new(OpCodes.Ldc_I4_S, (sbyte)64), new(OpCodes.Add)]
-                )
+                .MatchEndForward([new(OpCodes.Ldarg_2), new(OpCodes.Ldc_I4_S, (sbyte)64), new(OpCodes.Add)])
                 .Insert(
-                    [
-                        new(locBuildingData.opcode, locBuildingData.operand),
-                        new(OpCodes.Call, Method_MultByPondScale),
-                    ]
+                    [new(locBuildingData.opcode, locBuildingData.operand), new(OpCodes.Call, Method_MultByPondScale)]
                 );
             matcher
-                .MatchEndForward(
-                    [new(OpCodes.Ldarg_3), new(OpCodes.Ldc_I4_S, (sbyte)44), new(OpCodes.Add)]
-                )
+                .MatchEndForward([new(OpCodes.Ldarg_3), new(OpCodes.Ldc_I4_S, (sbyte)44), new(OpCodes.Add)])
                 .Insert(
-                    [
-                        new(locBuildingData.opcode, locBuildingData.operand),
-                        new(OpCodes.Call, Method_MultByPondScale),
-                    ]
+                    [new(locBuildingData.opcode, locBuildingData.operand), new(OpCodes.Call, Method_MultByPondScale)]
                 );
 
             // Pond Waves: scale
             matcher
                 .MatchEndForward(
                     [
-                        new(
-                            OpCodes.Call,
-                            AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))
-                        ),
+                        new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Vector2), nameof(Vector2.Zero))),
                         new(OpCodes.Ldc_R4, 4f),
                     ]
                 )
@@ -709,30 +601,17 @@ internal static class GamePatches
             // Netting: position
             matcher
                 .MatchStartForward(
-                    [
-                        new(OpCodes.Ldc_I4, 128),
-                        new(OpCodes.Sub),
-                        new(OpCodes.Conv_R4),
-                        new(OpCodes.Newobj),
-                    ]
+                    [new(OpCodes.Ldc_I4, 128), new(OpCodes.Sub), new(OpCodes.Conv_R4), new(OpCodes.Newobj)]
                 )
                 .Advance(1)
                 .Insert(
-                    [
-                        new(locBuildingData.opcode, locBuildingData.operand),
-                        new(OpCodes.Call, Method_MultByPondScale),
-                    ]
+                    [new(locBuildingData.opcode, locBuildingData.operand), new(OpCodes.Call, Method_MultByPondScale)]
                 );
 
             // Netting: scale
             matcher
                 .MatchEndForward(
-                    [
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Ldc_R4, 0f),
-                        new(OpCodes.Newobj),
-                        new(OpCodes.Ldc_R4, 4f),
-                    ]
+                    [new(OpCodes.Ldc_R4, 0f), new(OpCodes.Ldc_R4, 0f), new(OpCodes.Newobj), new(OpCodes.Ldc_R4, 4f)]
                 )
                 .Advance(1)
                 .Insert(
@@ -752,26 +631,15 @@ internal static class GamePatches
         }
     }
 
-    private static void FishPond_getSourceRectForMenu_Postfix(
-        FishPond __instance,
-        ref Rectangle? __result
-    )
+    private static void FishPond_getSourceRectForMenu_Postfix(FishPond __instance, ref Rectangle? __result)
     {
         if (__instance.GetData() is BuildingData data)
         {
-            __result = new(
-                0,
-                0,
-                data.Size.X * Game1.smallestTileSize,
-                data.Size.Y * Game1.smallestTileSize
-            );
+            __result = new(0, 0, data.Size.X * Game1.smallestTileSize, data.Size.Y * Game1.smallestTileSize);
         }
     }
 
-    private static void FishPond_GetItemBucketTile_Postfix(
-        FishPond __instance,
-        ref Vector2 __result
-    )
+    private static void FishPond_GetItemBucketTile_Postfix(FishPond __instance, ref Vector2 __result)
     {
         if (__instance.GetData() is BuildingData data)
         {

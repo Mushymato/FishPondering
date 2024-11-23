@@ -27,12 +27,13 @@ Aside from 3 and 4, you can change "PondSize" in config.json directly. Just note
 - English
 - Simplified Chinese
 - Spanish (by [Hayato2236](https://next.nexusmods.com/profile/Hayato2236))
+- Turkish (by [Airbench](https://next.nexusmods.com/profile/Airbench))
 
 More translations are welcome, preferrably added to the main mod but separate page is fine.
 
 ## Future Plans?
 
-- Proper 3x3 fish pond building that is balanced for that size (no legendary fish, less productive).
-- Proper 2x2 fish pond that only loads a limited selection of small, to encourage variety.
+- Proper 3x3 fish pond building that is balanced for that size, no legendary fish, less productive.
+- Proper 2x2 fish pond that only loads a limited selection of small fish/crabpot critters, since those never get put in ponds otherwise.
 
 Will need to find artist and devise balance for this, so don't expect it anytime soon.

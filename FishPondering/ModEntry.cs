@@ -34,9 +34,7 @@ public class ModEntry : Mod
             e.Edit(
                 (asset) =>
                 {
-                    IDictionary<string, BuildingData> data = asset
-                        .AsDictionary<string, BuildingData>()
-                        .Data;
+                    IDictionary<string, BuildingData> data = asset.AsDictionary<string, BuildingData>().Data;
                     data["Fish Pond"].Size = new(Config.PondSize, Config.PondSize);
                 },
                 AssetEditPriority.Late
