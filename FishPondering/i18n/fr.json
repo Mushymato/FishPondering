@@ -1,0 +1,5 @@
+{
+  "$schema": "https://smapi.io/schemas/i18n.json",
+  "config.PondSize.name": "Taille de l'étang",
+  "config.PondSize.description": "Taille de l'étang en termes de largeur de tuile. La valeur recommandée est 4. En plus de 3 et 4, vous pouvez modifier \"PondSize\" en config.json directement. Veuillez noter qu'il a un aspect très étrange et que je ne suis pas responsable des problèmes qui pourraient survenir."
+}

@@ -652,8 +652,9 @@ internal static class GamePatches
     {
         if (__instance.GetData() is BuildingData data)
         {
-            __result.X = __instance.tileX.Value + (data.Size.X / 2);
-            __result.Y = __instance.tileY.Value + (data.Size.Y / 2);
+            float offset = (data.Size.X % 2 == 0) ? -0.5f : 0f;
+            __result.X = __instance.tileX.Value + (data.Size.X / 2) + offset;
+            __result.Y = __instance.tileY.Value + (data.Size.Y / 2) + offset;
         }
     }
 }
